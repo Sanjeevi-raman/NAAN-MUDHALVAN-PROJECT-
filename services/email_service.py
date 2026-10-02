@@ -14,7 +14,7 @@ BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
 
 class EmailDeliveryError(RuntimeError):
-    """Raised when Brevo cannot accept a transactional email."""
+    """Raised when the configured transactional provider cannot accept an email."""
 
 
 def _send_otp_email(email: str, otp: str, subject: str, heading: str) -> None:
@@ -64,7 +64,9 @@ def _send_otp_email(email: str, otp: str, subject: str, heading: str) -> None:
         )
         response.raise_for_status()
     except Exception as exc:
-        logger.exception("Brevo transactional email failed: %s", exc)
+        provider = "Resend" if resend_api_key else "Brevo"
+        response_body = response.text[:500] if "response" in locals() else "no response received"
+        logger.error("%s transactional email failed: %s; provider response: %s", provider, exc, response_body)
         raise EmailDeliveryError("Transactional email delivery failed") from exc
 
 

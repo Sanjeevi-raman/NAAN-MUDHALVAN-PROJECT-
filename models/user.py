@@ -22,6 +22,7 @@ class UserResponse(BaseModel):
     email: str
     full_name: Optional[str] = None
     created_at: Optional[str] = None
+    email_verified: bool = False
 
 class TokenResponse(BaseModel):
     access_token: str

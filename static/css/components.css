@@ -13,6 +13,21 @@
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-xl);
+  isolation: isolate;
+  animation: hero-shift 12s ease-in-out infinite alternate;
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute;
+  width: 20rem;
+  height: 20rem;
+  right: -8rem;
+  bottom: -10rem;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2rem rgba(255,255,255,0.035), 0 0 0 4rem rgba(255,255,255,0.025);
+  z-index: 0;
 }
 
 .hero-content {
@@ -74,7 +89,21 @@
   box-shadow: var(--shadow-sm);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+  overflow: hidden;
 }
+
+.planner-card::before, .stat-box::before, .form-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.75), transparent 44%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.planner-card:hover::before, .stat-box:hover::before, .form-card:hover::before { opacity: 1; }
 
 .planner-card:hover {
   transform: translateY(-4px);
@@ -91,7 +120,10 @@
   justify-content: center;
   font-size: 1.75rem;
   margin-bottom: 1.25rem;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
 }
+
+.planner-card:hover .card-icon-box { transform: translateY(-4px) rotate(-5deg) scale(1.08); box-shadow: 0 10px 20px rgba(14, 116, 144, 0.18); }
 
 .icon-blue { background-color: var(--primary-50); color: var(--primary-600); }
 .icon-teal { background-color: #f0fdfa; color: var(--accent-teal); }
@@ -136,6 +168,8 @@
   border: 1px solid var(--neutral-200);
   padding: 2.25rem;
   box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
 }
 
 .form-group {
@@ -167,6 +201,20 @@
   border-color: var(--primary-500);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
 }
+
+.verification-mail-note {
+  display: grid;
+  gap: 0.2rem;
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #bae6fd;
+  border-radius: var(--radius-md);
+  background: #f0f9ff;
+  color: #0c4a6e;
+  font-size: 0.84rem;
+}
+
+.verification-mail-note span { color: #475569; }
 
 .form-row {
   display: grid;
@@ -219,7 +267,11 @@
   padding: 1.25rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--neutral-200);
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
+
+.stat-box:hover { transform: translateY(-4px); border-color: rgba(8, 145, 178, 0.35); box-shadow: var(--shadow-lg); }
 
 .stat-label {
   font-size: 0.8rem;
@@ -441,6 +493,14 @@
   border-bottom: 1px solid var(--neutral-200);
   font-size: 0.92rem;
 }
+
+.price-comparison-table tbody tr { transition: background-color 0.2s ease, transform 0.2s ease; }
+.price-comparison-table tbody tr:hover { background-color: var(--primary-50); }
+
+.reveal-on-load { opacity: 0; animation: reveal-card 0.7s calc(0.06s * var(--reveal-order)) cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+@keyframes reveal-card { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes hero-shift { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
 
 .saving-callout-card {
   background: linear-gradient(135deg, #065f46 0%, #047857 100%);

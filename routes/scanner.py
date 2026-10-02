@@ -22,6 +22,8 @@ templates = Jinja2Templates(directory="templates")
 async def scan_product_page(request: Request):
     """Render the Scan Product interface with live camera and upload controls."""
     user = get_current_user_optional(request)
+    if not user:
+        return RedirectResponse(url="/login?error=Please+login+to+access+the+Product+Scanner", status_code=status.HTTP_302_FOUND)
     return templates.TemplateResponse(request=request, name="scan_product.html", context={
         "user": user,
         "scan_result": None,
@@ -36,8 +38,8 @@ async def execute_product_scan(
     product_image: Optional[UploadFile] = File(None)
 ):
     """Analyze product image, identify specifications, compare with online market prices."""
-    user = get_current_user_optional(request)
-    user_id = user["id"] if user else None
+    user = get_current_user_required(request)
+    user_id = user["id"]
 
     if local_price <= 0:
         return templates.TemplateResponse(

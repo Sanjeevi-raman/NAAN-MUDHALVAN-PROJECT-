@@ -35,9 +35,34 @@ def init_db():
         email TEXT UNIQUE NOT NULL,
         hashed_password TEXT NOT NULL,
         full_name TEXT,
+        email_verified INTEGER NOT NULL DEFAULT 0,
+        email_verified_at TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
     """)
+
+    # Safe migration for databases created before email verification existed.
+    cursor.execute("PRAGMA table_info(users)")
+    user_columns = {row[1] for row in cursor.fetchall()}
+    if "email_verified" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0")
+    if "email_verified_at" not in user_columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN email_verified_at TEXT")
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS otp_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        otp_hash TEXT NOT NULL,
+        purpose TEXT NOT NULL CHECK (purpose IN ('EMAIL_VERIFICATION', 'LOGIN')),
+        expires_at TEXT NOT NULL,
+        used_at TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        attempt_count INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_otp_tokens_user_purpose ON otp_tokens(user_id, purpose)")
 
     # Planner Requests
     cursor.execute("""

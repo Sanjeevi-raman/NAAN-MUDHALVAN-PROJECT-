@@ -10,9 +10,19 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 from database.database import init_db, get_db_connection
+from services.auth_service import create_session
 from services.platforms.jeweler_shops import JEWELER_BRANDS
 
 client = TestClient(app)
+
+
+def verified_cookie(username):
+    conn = get_db_connection()
+    row = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
+    conn.execute("UPDATE users SET email_verified = 1 WHERE username = ?", (username,))
+    conn.commit()
+    conn.close()
+    return create_session(row["id"])
 
 @pytest.fixture(autouse=True)
 def setup_database():
@@ -53,9 +63,11 @@ def test_register_and_login_flow():
         "password": "securepassword123"
     }
     reg_response = client.post("/register", data=reg_data, follow_redirects=False)
-    # Registration should set session cookie and redirect to dashboard
+    # Registration must require email verification before activation.
     assert reg_response.status_code == 303
-    assert "pocketsmart_session" in reg_response.cookies
+    assert reg_response.headers["location"].startswith("/verify-email")
+    assert "pocketsmart_session" not in reg_response.cookies
+    cookie = verified_cookie("testuser_unique")
 
     # 2. Duplicate registration should be rejected
     dup_response = client.post("/register", data=reg_data, follow_redirects=False)
@@ -65,7 +77,7 @@ def test_register_and_login_flow():
     # 3. Invalid login should fail
     bad_login = client.post("/login", data={"username": "testuser_unique", "password": "wrongpassword"})
     assert bad_login.status_code == 400
-    assert "Invalid username or password" in bad_login.text
+    assert "Invalid email or password" in bad_login.text
 
     # 4. Valid login sets cookie
     good_login = client.post("/login", data={"username": "testuser_unique", "password": "securepassword123"}, follow_redirects=False)
@@ -102,7 +114,7 @@ def test_home_planner_budget_allocation():
         "email": "home_user_99@example.com",
         "password": "password123"
     }, follow_redirects=False)
-    cookie = reg.cookies.get("pocketsmart_session")
+    cookie = verified_cookie("home_user_99")
 
     # Generate plan with 50,000 budget
     plan_data = {
@@ -146,7 +158,7 @@ def test_party_planner_with_geolocation_and_60km_rule():
         "email": "party_user_99@example.com",
         "password": "password123"
     }, follow_redirects=False)
-    cookie = reg.cookies.get("pocketsmart_session")
+    cookie = verified_cookie("party_user_99")
 
     party_data = {
         "total_budget": 80000.0,
@@ -194,7 +206,7 @@ def test_jewelry_planner_text_only():
         "email": "jewelry_user_99@example.com",
         "password": "password123"
     }, follow_redirects=False)
-    cookie = reg.cookies.get("pocketsmart_session")
+    cookie = verified_cookie("jewelry_user_99")
 
     jewel_data = {
         "total_budget": 20000.0,
@@ -255,7 +267,7 @@ def test_product_price_scanner_comparison_and_savings():
         "email": "scanner_user_99@example.com",
         "password": "password123"
     }, follow_redirects=False)
-    cookie = reg.cookies.get("pocketsmart_session")
+    cookie = verified_cookie("scanner_user_99")
 
     # Local price ₹1000
     scan_data = {
@@ -292,7 +304,7 @@ def test_user_history_isolation():
         "email": "alpha@example.com",
         "password": "password123"
     }, follow_redirects=False)
-    cookie_a = user_a.cookies.get("pocketsmart_session")
+    cookie_a = verified_cookie("user_alpha")
 
     # User B
     user_b = client.post("/register", data={
@@ -301,7 +313,7 @@ def test_user_history_isolation():
         "email": "beta@example.com",
         "password": "password123"
     }, follow_redirects=False)
-    cookie_b = user_b.cookies.get("pocketsmart_session")
+    cookie_b = verified_cookie("user_beta")
 
     # User A generates a plan
     client.post("/generate-home", data={

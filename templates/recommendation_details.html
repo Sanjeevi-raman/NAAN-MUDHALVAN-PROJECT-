@@ -17,6 +17,7 @@
                 {% endif %}
             </h1>
             <p class="page-subtitle">
+                Every detail behind your personalized plan. —
                 {% if plan %}
                     Created on {{ plan.created_at[:10] }} • Target Budget: <span data-currency>{{ plan.total_budget }}</span>
                 {% elif item %}

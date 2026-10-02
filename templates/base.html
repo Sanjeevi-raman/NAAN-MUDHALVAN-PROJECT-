@@ -16,7 +16,32 @@
     <link rel="stylesheet" href="/static/css/components.css">
     {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}page-default{% endblock %}">
+    <div class="opening-scene" aria-hidden="true">
+        <div class="opening-glow"></div>
+        <div class="scene-wallet wallet-animation">
+            <div class="wallet-body"><span class="wallet-snap"></span></div>
+            <div class="wallet-pocket"></div>
+            <span class="cash-note cash-note-one">₹</span>
+            <span class="cash-note cash-note-two">₹</span>
+            <span class="cash-note cash-note-three">₹</span>
+        </div>
+        <div class="scene-home door-animation">
+            <div class="door-frame"><div class="door-panel"><span class="door-handle"></span></div></div>
+            <span class="door-light"></span>
+        </div>
+        <div class="scene-party decor-animation">
+            <span class="decor-balloon balloon-one"></span><span class="decor-balloon balloon-two"></span>
+            <span class="decor-balloon balloon-three"></span><span class="decor-confetti confetti-one">✦</span>
+            <span class="decor-confetti confetti-two">✦</span><span class="decor-confetti confetti-three">✦</span>
+        </div>
+        <div class="scene-jewelry jewel-animation">
+            <span class="jewel-orbit"></span><span class="jewel-gem">◆</span><span class="jewel-spark spark-one">✦</span><span class="jewel-spark spark-two">✦</span>
+        </div>
+        <div class="scene-scan scan-animation"><span class="scan-frame"></span><span class="scan-beam"></span><span class="scan-corner scan-corner-tl"></span><span class="scan-corner scan-corner-br"></span></div>
+        <p class="opening-label">Making every rupee count</p>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-container">

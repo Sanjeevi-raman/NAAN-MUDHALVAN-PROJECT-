@@ -8,18 +8,8 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 from database.database import init_db, get_db_connection
-from services.auth_service import create_session
 
 client = TestClient(app)
-
-
-def verified_cookie(username):
-    conn = get_db_connection()
-    row = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
-    conn.execute("UPDATE users SET email_verified = 1 WHERE username = ?", (username,))
-    conn.commit()
-    conn.close()
-    return create_session(row["id"])
 
 @pytest.fixture(autouse=True)
 def setup_clean_db():
@@ -43,7 +33,7 @@ def test_invalid_input_validation():
         "email": "val@example.com",
         "password": "password123"
     }, follow_redirects=False)
-    cookie = verified_cookie("val_user")
+    cookie = reg.cookies.get("pocketsmart_session")
 
     # Negative budget in Home Planner
     resp1 = client.post("/generate-home", data={
@@ -78,7 +68,7 @@ def test_missing_website_graceful_handling():
         "email": "venue@example.com",
         "password": "password123"
     }, follow_redirects=False)
-    cookie = verified_cookie("venue_user")
+    cookie = reg.cookies.get("pocketsmart_session")
 
     resp = client.post("/generate-party", data={
         "total_budget": 60000.0,
@@ -102,7 +92,7 @@ def test_scan_history_api():
         "email": "scanlog@example.com",
         "password": "password123"
     }, follow_redirects=False)
-    cookie = verified_cookie("scanner_logger")
+    cookie = reg.cookies.get("pocketsmart_session")
 
     # Perform 2 scans
     client.post("/scan-product", data={
@@ -131,7 +121,7 @@ def test_recommendation_details_page():
         "email": "detail@example.com",
         "password": "password123"
     }, follow_redirects=False)
-    cookie = verified_cookie("detail_checker")
+    cookie = reg.cookies.get("pocketsmart_session")
 
     # Generate home plan
     plan_resp = client.post("/generate-home", data={

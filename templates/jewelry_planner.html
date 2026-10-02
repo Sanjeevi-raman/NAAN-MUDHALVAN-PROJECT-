@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Jewellery Budget Planner - PocketSmart AI{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="max-width: 720px; margin: 1.5rem auto;">
+    <div class="page-header">
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 0.5rem;">
+            <a href="/dashboard" style="color:var(--neutral-500); font-size:0.9rem;">&larr; Back to Dashboard</a>
+        </div>
+        <h1 class="page-title">💎 Real Jewellery Budget Planner</h1>
+        <p class="page-subtitle">
+            Curate 100% authentic precious jewellery in <strong>Gold, Silver, Platinum, or Diamond</strong> from India's certified jewellery houses and marketplaces. Strictly no imitation or bangles.
+        </p>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-error">
+            <span>⚠️</span>
+            <span>{{ error }}</span>
+        </div>
+    {% endif %}
+
+    <div class="form-card">
+        <form action="/generate-jewelry" method="POST" enctype="multipart/form-data">
+            <!-- Budget -->
+            <div class="form-group">
+                <label for="total_budget" class="form-label">Total Real Jewellery Budget (INR) <span style="color:var(--accent-rose);">*</span></label>
+                <div class="input-prefix-box">
+                    <span>₹</span>
+                    <input type="number" id="total_budget" name="total_budget" class="form-input" value="{{ default_budget }}" min="1000" step="500" required>
+                </div>
+                <small style="color:var(--neutral-500); font-size:0.8rem; margin-top:0.25rem; display:block;">
+                    Recommended: ₹2,000 - ₹15,000 for 925 Pure Silver; ₹15,000 - ₹50,000+ for 14K/18K/22K Hallmarked Gold, Platinum Pt950 & Solitaire Diamonds.
+                </small>
+            </div>
+
+            <!-- Precious Metal Choice & Occasion -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="precious_metal" class="form-label">Precious Metal / Stone <span style="color:var(--accent-rose);">*</span></label>
+                    <select id="precious_metal" name="precious_metal" class="form-select" required>
+                        <option value="Gold" selected>🟡 Pure Gold (22K BIS 916 & 18K Hallmarked)</option>
+                        <option value="Diamond">💎 Certified Diamonds (Solitaire / Natural IGI-SGL)</option>
+                        <option value="Platinum">⚪ Pure Platinum (Pt 950 Guild Certified)</option>
+                        <option value="Silver">🔘 Pure Silver (925 Authenticated Sterling Silver)</option>
+                        <option value="All Precious">✨ Curated Mix (Gold, Diamond, Platinum & Silver)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="occasion" class="form-label">Occasion / Event <span style="color:var(--accent-rose);">*</span></label>
+                    <select id="occasion" name="occasion" class="form-select" required>
+                        <option value="Wedding / Reception" selected>Wedding / Reception</option>
+                        <option value="Festive / Diwali / Pooja">Festive / Diwali / Pooja</option>
+                        <option value="Cocktail / Evening Party">Cocktail / Evening Party</option>
+                        <option value="Casual / Office Wear">Casual / Office Wear</option>
+                        <option value="Engagement Ceremony">Engagement Ceremony</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Aesthetic Style & Showroom Location -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="style_preference" class="form-label">Aesthetic Style Preference</label>
+                    <select id="style_preference" name="style_preference" class="form-select">
+                        <option value="Traditional Temple & Heritage" selected>Traditional Temple & Heritage Gold</option>
+                        <option value="Contemporary Solitaire & Modern">Contemporary Solitaire & Modern</option>
+                        <option value="Minimalist Delicate">Minimalist Delicate & Everyday Fine</option>
+                        <option value="Royal Kundan Jadau">Royal Kundan Jadau in Pure Gold</option>
+                        <option value="Classic Western Diamond Elegance">Classic Western Diamond Elegance</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="location" class="form-label">City / Area for Jewellery Showrooms</label>
+                    <input type="text" id="location" name="location" class="form-input" placeholder="e.g. Chennai, Mumbai, Bangalore, or Nearby" value="Nearby">
+                    <small style="color:var(--neutral-500); font-size:0.78rem; margin-top:0.2rem; display:block;">
+                        Locates Tanishq, Malabar, Kalyan, CaratLane & BlueStone showrooms on Google Maps.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Multimodal Outfit Image (OPTIONAL) -->
+            <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem;">
+                <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>📸 Upload Outfit Photo (Optional Multimodal AI)</span>
+                    <span style="font-size:0.75rem; color:var(--primary-600); font-weight:700;">TEXT ONLY OR TEXT + IMAGE</span>
+                </label>
+                <p style="font-size:0.85rem; color:var(--neutral-600); margin-bottom:1rem;">
+                    Upload a picture of your saree, lehenga, gown, or dress. Gemini Multimodal AI will inspect the neckline cut, embroidery tones, and fabrics to suggest complementary metals and stones.
+                </p>
+
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+                    <input type="file" id="outfit_image" name="outfit_image" accept="image/*" class="form-input" style="flex:1;">
+                    <div id="imagePreviewContainer" style="display:none;">
+                        <img id="imagePreview" style="max-height:80px; border-radius:var(--radius-sm); border:1px solid var(--neutral-300);" alt="Outfit preview">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outfit Description -->
+            <div class="form-group">
+                <label for="outfit_description" class="form-label">Outfit Details or Color Notes (Optional)</label>
+                <textarea id="outfit_description" name="outfit_description" class="form-textarea" rows="2" placeholder="e.g. Emerald green silk saree with gold zari border, deep V-neck blouse."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:1rem;">
+                Generate Jewellery Recommendations &rarr;
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const fileInput = document.getElementById('outfit_image');
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const previewImg = document.getElementById('imagePreview');
+
+    if (fileInput && previewImg) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                previewImg.src = URL.createObjectURL(file);
+                previewContainer.style.display = 'block';
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

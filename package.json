@@ -1,0 +1,14 @@
+{
+  "name": "pocketsmart-ai",
+  "version": "1.0.0",
+  "description": "PocketSmart AI - Your Smart Budget & Recommendation Assistant",
+  "scripts": {
+    "dev": ".\\.venv\\Scripts\\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
+    "start": ".\\.venv\\Scripts\\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000",
+    "test": ".\\.venv\\Scripts\\python.exe -m pytest tests/ -v",
+    "verify": ".\\.venv\\Scripts\\python.exe scripts\\e2e_verify.py"
+  },
+  "keywords": ["ai", "budget", "fastapi", "gemini", "recommendations"],
+  "author": "PocketSmart AI Team",
+  "license": "MIT"
+}

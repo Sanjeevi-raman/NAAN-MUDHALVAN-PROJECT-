@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PocketSmart AI - Your Smart Budget & Recommendation Assistant{% endblock %}</title>
+    <meta name="description" content="AI-powered budget planning and recommendations for Home Interior, Parties, Jewelry, and in-store Product Price Scanning.">
+    
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="brand-link">
+                <span>PocketSmart</span>
+                <span class="brand-badge">AI</span>
+            </a>
+
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/home-planner" class="nav-link">Home Planner</a></li>
+                <li><a href="/party-planner" class="nav-link">Party Planner</a></li>
+                <li><a href="/jewelry-planner" class="nav-link">Jewelry Planner</a></li>
+                <li><a href="/scan-product" class="nav-link">Scan Product</a></li>
+                {% if user %}
+                    <li><a href="/history" class="nav-link">History</a></li>
+                    <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+                {% endif %}
+            </ul>
+
+            <div class="nav-auth-buttons">
+                {% if user %}
+                    <span style="font-size:0.88rem;color:var(--neutral-600);margin-right:0.5rem;font-weight:600;">
+                        Hi, {{ user.full_name or user.username }}
+                    </span>
+                    <a href="/logout" class="btn btn-secondary btn-sm">Logout</a>
+                {% else %}
+                    <a href="/login" class="btn btn-outline-primary btn-sm">Login</a>
+                    <a href="/register" class="btn btn-primary btn-sm">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div>
+                <strong>PocketSmart AI</strong> &copy; 2026. Your Smart Budget & Recommendation Assistant.
+            </div>
+            <div class="footer-links">
+                <a href="/home-planner">Home Interior</a>
+                <a href="/party-planner">Party Planner</a>
+                <a href="/jewelry-planner">Jewelry Planner</a>
+                <a href="/scan-product">Price Scanner</a>
+                {% if user %}
+                    <a href="/dashboard">Dashboard</a>
+                {% else %}
+                    <a href="/login">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </footer>
+
+    <!-- Client Scripts -->
+    <script src="/static/js/main.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

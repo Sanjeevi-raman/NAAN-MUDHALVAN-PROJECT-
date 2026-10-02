@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}PocketSmart AI - Your Smart Budget & Recommendation Assistant{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <div class="hero-tag">
+            <span>✨ AI-Powered Lifestyle Budget Optimization</span>
+        </div>
+        <h1 class="hero-title">Plan Smarter. Spend Wiser. Live Better.</h1>
+        <p class="hero-desc">
+            PocketSmart AI takes your budget, preferences, and location to curate tailored, actionable recommendations across home interiors, celebrations, jewelry, and real-time physical store price comparisons.
+        </p>
+        <div class="hero-cta-group">
+            {% if user %}
+                <a href="/dashboard" class="btn btn-secondary btn-lg">Go to Dashboard</a>
+                <a href="/scan-product" class="btn btn-accent btn-lg">📷 Scan Product</a>
+            {% else %}
+                <a href="/register" class="btn btn-secondary btn-lg">Get Started Free</a>
+                <a href="/login" class="btn btn-outline-primary btn-lg" style="color:#ffffff;border-color:#ffffff;">Sign In</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Planners Overview Section -->
+<div class="page-header" style="text-align: center; margin-bottom: 2.5rem;">
+    <h2 class="page-title">Smart Budget Planners</h2>
+    <p class="page-subtitle">Select a planner tailored to your lifestyle requirements.</p>
+</div>
+
+<div class="planners-grid">
+    <!-- Home Interior Card -->
+    <div class="planner-card">
+        <div class="card-icon-box icon-blue">🛋️</div>
+        <h3 class="card-title">Home Interior Planner</h3>
+        <p class="card-desc">
+            Balance furniture, lighting, ceiling fans, and room decor within your target budget.
+        </p>
+        <ul class="card-features-list">
+            <li>✓ Room-by-room budget allocation</li>
+            <li>✓ Lighting, fans, furniture & decor balance</li>
+            <li>✓ Verified links to Amazon, Flipkart, IKEA</li>
+            <li>✓ Avoids unnecessary overspending</li>
+        </ul>
+        <a href="/home-planner" class="btn btn-primary btn-block">Launch Home Planner</a>
+    </div>
+
+    <!-- Party Budget Card -->
+    <div class="planner-card">
+        <div class="card-icon-box icon-teal">🎉</div>
+        <h3 class="card-title">Party Budget Planner</h3>
+        <p class="card-desc">
+            Complete event budgeting with location-aware nearby venues, catering, and travel estimates.
+        </p>
+        <ul class="card-features-list">
+            <li>✓ Nearby-first venues with 60 KM rule</li>
+            <li>✓ Real travel time & expense calculations</li>
+            <li>✓ Per-plate catering & entertainment setups</li>
+            <li>✓ Direct Google Maps & official links</li>
+        </ul>
+        <a href="/party-planner" class="btn btn-primary btn-block">Launch Party Planner</a>
+    </div>
+
+    <!-- Jewelry Budget Card -->
+    <div class="planner-card">
+        <div class="card-icon-box icon-amber">💎</div>
+        <h3 class="card-title">Jewelry Budget Planner</h3>
+        <p class="card-desc">
+            Text and multimodal outfit image styling to match earrings, necklaces, and bangles.
+        </p>
+        <ul class="card-features-list">
+            <li>✓ Multimodal AI outfit image analysis</li>
+            <li>✓ Color, neckline & aesthetic coordination</li>
+            <li>✓ Occasion-based budget split (Wedding, Festive)</li>
+            <li>✓ Direct product search & buying links</li>
+        </ul>
+        <a href="/jewelry-planner" class="btn btn-primary btn-block">Launch Jewelry Planner</a>
+    </div>
+</div>
+
+<!-- Scan Product Feature Spotlight -->
+<div style="background-color: var(--white); border-radius: var(--radius-xl); border: 1px solid var(--neutral-200); padding: 3rem; margin-bottom: 3rem; box-shadow: var(--shadow-md);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2rem;">
+        <div style="max-width: 580px;">
+            <span class="rec-category-badge" style="background-color: #ecfdf5; color: #047857; margin-bottom: 0.75rem; display: inline-block;">
+                NEW IN-STORE FEATURE
+            </span>
+            <h2 style="font-size: 2rem; font-weight: 800; color: var(--primary-900); margin-bottom: 0.75rem;">
+                Scan Product & Compare Live Market Prices
+            </h2>
+            <p style="color: var(--neutral-600); font-size: 1.05rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                Standing in a physical store? Snap a photo of the product, enter the store's quoted price, and instantly see observed online prices across Amazon and Flipkart, with calculated shipping fees and verified possible savings.
+            </p>
+            <a href="/scan-product" class="btn btn-accent btn-lg">Try Product Scanner Now</a>
+        </div>
+        <div style="background-color: #f8fafc; border: 1px solid var(--neutral-200); border-radius: var(--radius-lg); padding: 1.75rem; min-width: 280px;">
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--neutral-500); text-transform: uppercase; margin-bottom: 0.5rem;">Live Comparison Sample</div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Local Store Price:</span>
+                <strong style="color: var(--neutral-800);">₹1,000</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span>Observed Online Price:</span>
+                <strong style="color: var(--primary-600);">₹799</strong>
+            </div>
+            <div style="border-top: 1px solid var(--neutral-300); padding-top: 0.5rem; display: flex; justify-content: space-between;">
+                <span style="font-weight: 700; color: var(--accent-emerald);">Possible Saving:</span>
+                <strong style="color: var(--accent-emerald); font-size: 1.15rem;">₹201</strong>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

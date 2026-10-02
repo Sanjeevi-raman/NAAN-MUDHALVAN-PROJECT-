@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PocketSmart AI{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 class="page-title">Welcome, {{ user.full_name or user.username }}!</h1>
+        <p class="page-subtitle">Here is your smart budget activity and quick planner tools.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="/scan-product" class="btn btn-accent btn-sm">📷 Scan In-Store Product</a>
+        <a href="/history" class="btn btn-secondary btn-sm">View Complete History</a>
+    </div>
+</div>
+
+<!-- Stats Metric Row -->
+<div class="summary-stats-grid" style="margin-bottom: 2.5rem;">
+    <div class="stat-box">
+        <div class="stat-label">Total Plans Created</div>
+        <div class="stat-value primary">{{ total_plans }}</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Total Budget Managed</div>
+        <div class="stat-value" data-currency>{{ total_budget_sum }}</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Products Scanned</div>
+        <div class="stat-value">{{ total_scans }}</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Potential Online Savings</div>
+        <div class="stat-value success" data-currency>{{ total_savings }}</div>
+    </div>
+</div>
+
+<!-- Quick Planners Access Grid -->
+<div style="margin-bottom: 1rem;">
+    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--primary-900);">Launch a Budget Planner</h2>
+</div>
+
+<div class="planners-grid" style="margin-bottom: 3rem;">
+    <div class="planner-card">
+        <div class="card-icon-box icon-blue">🛋️</div>
+        <h3 class="card-title">Home Interior Planner</h3>
+        <p class="card-desc">Plan furniture, lighting, ceiling fans, and room decor within your specified budget.</p>
+        <a href="/home-planner" class="btn btn-primary btn-block">Open Home Planner</a>
+    </div>
+
+    <div class="planner-card">
+        <div class="card-icon-box icon-teal">🎉</div>
+        <h3 class="card-title">Party Budget Planner</h3>
+        <p class="card-desc">Find venues with 60 KM nearby logic, calculate travel expenses, and optimize catering.</p>
+        <a href="/party-planner" class="btn btn-primary btn-block">Open Party Planner</a>
+    </div>
+
+    <div class="planner-card">
+        <div class="card-icon-box icon-amber">💎</div>
+        <h3 class="card-title">Jewelry Budget Planner</h3>
+        <p class="card-desc">Coordinate necklace, earrings, and bangles with optional multimodal outfit photo styling.</p>
+        <a href="/jewelry-planner" class="btn btn-primary btn-block">Open Jewelry Planner</a>
+    </div>
+
+    <div class="planner-card">
+        <div class="card-icon-box icon-emerald">📷</div>
+        <h3 class="card-title">Product Price Scanner</h3>
+        <p class="card-desc">Snap in-store products to compare physical retail prices against observed online rates.</p>
+        <a href="/scan-product" class="btn btn-accent btn-block">Open Price Scanner</a>
+    </div>
+</div>
+
+<!-- Recent Recommendation Activity -->
+<div class="form-card" style="padding: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900);">Recent Recommendation Activity</h2>
+        <a href="/history" style="font-size: 0.9rem; font-weight: 600;">View All &rarr;</a>
+    </div>
+
+    {% if recent_plans %}
+        <div style="overflow-x: auto;">
+            <table class="price-comparison-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Planner Type</th>
+                        <th>Budget</th>
+                        <th>Planned Spend</th>
+                        <th>Status</th>
+                        <th>Items</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in recent_plans %}
+                    <tr>
+                        <td style="color: var(--neutral-600); font-size: 0.85rem;">{{ p.created_at[:10] }}</td>
+                        <td>
+                            <span class="rec-category-badge">
+                                {{ p.planner_type | capitalize }}
+                            </span>
+                        </td>
+                        <td><strong data-currency>{{ p.total_budget }}</strong></td>
+                        <td data-currency>{{ p.allocated_spend }}</td>
+                        <td>
+                            {% if p.status == 'within_budget' %}
+                                <span style="color: var(--accent-emerald); font-weight: 600;">✓ Within Budget</span>
+                            {% elif p.status == 'near_budget' %}
+                                <span style="color: var(--accent-amber); font-weight: 600;">~ Near Budget</span>
+                            {% else %}
+                                <span style="color: var(--accent-rose); font-weight: 600;">! Over Budget</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ p.item_count }} items</td>
+                        <td>
+                            <a href="/recommendations-details?history_id={{ p.id }}" class="btn btn-secondary btn-sm">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 2.5rem 1rem; color: var(--neutral-500);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📋</div>
+            <p style="font-weight: 600; font-size: 1.05rem;">No recommendation plans created yet.</p>
+            <p style="font-size: 0.9rem; margin-top: 0.25rem;">Choose one of the planners above to generate your first optimized lifestyle budget!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Party Budget Planner - PocketSmart AI{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="max-width: 720px; margin: 1.5rem auto;">
+    <div class="page-header">
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 0.5rem;">
+            <a href="/dashboard" style="color:var(--neutral-500); font-size:0.9rem;">&larr; Back to Dashboard</a>
+        </div>
+        <h1 class="page-title">🎉 Party Budget Planner</h1>
+        <p class="page-subtitle">
+            Plan your event with 60 KM nearby venue discovery, live distance calculations, travel expense estimates, and catering.
+        </p>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-error">
+            <span>⚠️</span>
+            <span>{{ error }}</span>
+        </div>
+    {% endif %}
+
+    <div class="form-card">
+        <form action="/generate-party" method="POST" id="partyForm">
+            <!-- Hidden Geolocation Fields -->
+            <input type="hidden" id="user_latitude" name="user_latitude">
+            <input type="hidden" id="user_longitude" name="user_longitude">
+
+            <!-- Location Detection Box -->
+            <div style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                    <div>
+                        <div style="font-weight: 700; color: var(--primary-900); font-size: 0.95rem;">
+                            📍 Location-Aware Nearby Search (60 KM Rule)
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--neutral-600); margin-top: 0.2rem;">
+                            Allow browser location to prioritize nearby banquet halls and calculate realistic travel costs.
+                        </div>
+                    </div>
+                    <button type="button" id="detectLocationBtn" class="btn btn-primary btn-sm">
+                        📍 Detect My Location
+                    </button>
+                </div>
+                <div id="locationStatus"></div>
+            </div>
+
+            <!-- Budget & Guest Count -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="total_budget" class="form-label">Total Party Budget (INR) <span style="color:var(--accent-rose);">*</span></label>
+                    <div class="input-prefix-box">
+                        <span>₹</span>
+                        <input type="number" id="total_budget" name="total_budget" class="form-input" value="{{ default_budget }}" min="5000" step="1000" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="guest_count" class="form-label">Expected Guest Count <span style="color:var(--accent-rose);">*</span></label>
+                    <input type="number" id="guest_count" name="guest_count" class="form-input" value="{{ default_guests }}" min="5" max="5000" required>
+                </div>
+            </div>
+
+            <!-- Event Type & Venue Preference -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="event_type" class="form-label">Event Type <span style="color:var(--accent-rose);">*</span></label>
+                    <select id="event_type" name="event_type" class="form-select" required>
+                        <option value="Birthday Celebration" selected>Birthday Celebration</option>
+                        <option value="Corporate Event / Dinner">Corporate Event / Dinner</option>
+                        <option value="Wedding / Reception">Wedding / Reception</option>
+                        <option value="Anniversary Party">Anniversary Party</option>
+                        <option value="Baby Shower / Naming Ceremony">Baby Shower / Naming Ceremony</option>
+                        <option value="Cocktail / Social Gathering">Cocktail / Social Gathering</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="venue_preference" class="form-label">Preferred Venue Type</label>
+                    <select id="venue_preference" name="venue_preference" class="form-select">
+                        <option value="Banquet Hall" selected>Air Conditioned Banquet Hall</option>
+                        <option value="Open Lawn / Garden">Open Lawn / Garden Space</option>
+                        <option value="Rooftop Lounge">Rooftop Lounge / Terrace</option>
+                        <option value="Hotel Ballrooms">Hotel Ballrooms</option>
+                        <option value="Community Center">Community Center</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Catering & Travel Mode -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="catering_preference" class="form-label">Catering Spread Style</label>
+                    <select id="catering_preference" name="catering_preference" class="form-select">
+                        <option value="Multi-Cuisine Buffet" selected>Multi-Cuisine Buffet</option>
+                        <option value="Traditional Vegetarian Thali">Traditional Vegetarian Thali</option>
+                        <option value="Cocktail Starters & Finger Food">Cocktail Starters & Finger Food</option>
+                        <option value="Barbecue & Live Counters">Barbecue & Live Counters</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="travel_mode" class="form-label">Primary Travel Mode for Estimation</label>
+                    <select id="travel_mode" name="travel_mode" class="form-select">
+                        <option value="car" selected>Car (₹12/km roundtrip)</option>
+                        <option value="bike">Bike / Two-Wheeler (₹4.5/km)</option>
+                        <option value="public">Public Transit / Metro (₹2/km)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Checkbox Inclusions -->
+            <div style="background-color:#f8fafc; border:1px solid var(--neutral-200); border-radius:var(--radius-md); padding:1rem; margin-bottom:1.5rem;">
+                <label class="form-label" style="margin-bottom:0.6rem; color:var(--primary-900);">Budget Inclusions</label>
+                <div style="display:flex; gap:1.5rem; flex-wrap:wrap;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; cursor:pointer;">
+                        <input type="checkbox" name="decoration_needed" value="true" checked>
+                        Theme Stage & Balloon Decor
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; cursor:pointer;">
+                        <input type="checkbox" name="entertainment_needed" value="true" checked>
+                        Sound System & DJ Host
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; cursor:pointer;">
+                        <input type="checkbox" name="accommodation_needed" value="true">
+                        Guest Hotel Rooms (OYO/Hotels)
+                    </label>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="form-group">
+                <label for="additional_notes" class="form-label">Special Requests or Instructions</label>
+                <textarea id="additional_notes" name="additional_notes" class="form-textarea" rows="2" placeholder="e.g. Need dedicated valet parking, pure veg caterer, stage lighting for 7 PM."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:1rem;">
+                Generate Party Budget & Venues &rarr;
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/location.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        initGeolocation('detectLocationBtn', 'locationStatus', 'user_latitude', 'user_longitude');
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Home Interior Recommendations - PocketSmart AI{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem;">
+    <div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 0.5rem;">
+            <a href="/home-planner" style="color:var(--neutral-500); font-size:0.9rem;">&larr; Reconfigure Plan</a>
+            <span style="color:var(--neutral-400);">•</span>
+            <span style="color:var(--neutral-600); font-size:0.9rem;">Room: {{ input.room_type }} ({{ input.style_preference }})</span>
+        </div>
+        <h1 class="page-title">Home Interior Plan</h1>
+        <p class="page-subtitle">{{ summary.ai_summary }}</p>
+    </div>
+    <div style="display:flex; gap:0.75rem;">
+        <a href="/home-planner" class="btn btn-secondary btn-sm">Edit Inputs</a>
+        <a href="/history" class="btn btn-primary btn-sm">View in History</a>
+    </div>
+</div>
+
+<!-- Budget Summary Panel -->
+<div class="budget-summary-panel">
+    <div class="summary-stats-grid">
+        <div class="stat-box">
+            <div class="stat-label">Total Budget</div>
+            <div class="stat-value" data-currency>{{ summary.total_budget }}</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Estimated Spend</div>
+            <div class="stat-value primary" data-currency>{{ summary.total_spend }}</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Remaining Budget</div>
+            <div class="stat-value {% if summary.remaining_budget >= 0 %}success{% else %}danger{% endif %}" data-currency>
+                {{ summary.remaining_budget }}
+            </div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Budget Status</div>
+            <div style="margin-top:0.35rem;">
+                {% if summary.budget_status == 'within_budget' %}
+                    <span class="rec-badge-nearby" style="font-size:0.9rem; padding:0.3rem 0.75rem;">✓ Within Target Budget</span>
+                {% elif summary.budget_status == 'near_budget' %}
+                    <span style="background-color:#fef3c7; color:#92400e; font-weight:700; font-size:0.85rem; padding:0.3rem 0.75rem; border-radius:var(--radius-sm);">
+                        ~ Near Budget Limit
+                    </span>
+                {% else %}
+                    <span class="rec-badge-far" style="font-size:0.9rem; padding:0.3rem 0.75rem;">! Over Budget</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Allocation Breakdown Progress -->
+    <div style="margin-top: 1rem;">
+        <div style="display:flex; justify-content:space-between; font-size:0.82rem; font-weight:700; color:var(--neutral-600); margin-bottom:0.35rem;">
+            <span>Category Allocation Breakdown</span>
+            <span>{{ (summary.total_spend / summary.total_budget * 100) | round(1) }}% Utilized</span>
+        </div>
+        <div class="budget-progress-track">
+            <div class="budget-progress-fill" style="width: {{ [100, (summary.total_spend / summary.total_budget * 100)] | min }}%;"></div>
+        </div>
+
+        <div style="display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:0.75rem;">
+            {% for alloc in summary.allocations %}
+            <div style="font-size:0.82rem; color:var(--neutral-600);">
+                <span style="font-weight:700; color:var(--neutral-800);">{{ alloc.category }}:</span>
+                <span data-currency>{{ alloc.spent_amount }}</span>
+                <span style="color:var(--neutral-400);">/</span>
+                <span data-currency>{{ alloc.allocated_amount }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Recommendations List -->
+<div style="margin-bottom: 1.25rem;">
+    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--primary-900);">Recommended Interior Products</h2>
+</div>
+
+<div class="recommendations-grid">
+    {% for item in summary.items %}
+    <div class="rec-card">
+        <div class="rec-header">
+            <span class="rec-category-badge">{{ item.category }}</span>
+            <span style="font-size:0.82rem; font-weight:700; color:var(--neutral-600);">
+                ⭐ {{ item.rating or '4.3' }} ({{ item.review_count or '1k+' }})
+            </span>
+        </div>
+
+        <h3 class="rec-title">{{ item.name }}</h3>
+        <p style="font-size:0.88rem; color:var(--neutral-600); margin-bottom:0.75rem; line-height:1.4;">
+            {{ item.description }}
+        </p>
+
+        <div class="rec-price-box">
+            <div class="rec-price-row">
+                <span>Unit Price:</span>
+                <span data-currency>{{ item.price }}</span>
+            </div>
+            <div class="rec-price-row">
+                <span>Quantity:</span>
+                <span>&times; {{ item.quantity }}</span>
+            </div>
+            <div class="rec-price-row" style="border-top: 1px solid var(--neutral-200); padding-top:0.35rem; margin-top:0.35rem;">
+                <strong style="color:var(--neutral-800);">Total Item Cost:</strong>
+                <span class="rec-price-highlight" data-currency>{{ item.total_price }}</span>
+            </div>
+        </div>
+
+        {% if item.reason %}
+        <div class="rec-reason">
+            <strong>Why selected:</strong> {{ item.reason }}
+        </div>
+        {% endif %}
+
+        <div class="rec-actions">
+            <!-- Actionable live links -->
+            <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="flex:1;">
+                View on {{ item.platform }} &rarr;
+            </a>
+            {% if history_id %}
+            <a href="/recommendations-details?history_id={{ history_id }}" class="btn btn-secondary btn-sm">
+                Details
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

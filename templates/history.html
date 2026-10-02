@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}My Planning & Scan History - PocketSmart AI{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem;">
+    <div>
+        <h1 class="page-title">Personal Planning History</h1>
+        <p class="page-subtitle">Inspect your previous budget plans and store price scans.</p>
+    </div>
+    <div style="display:flex; gap:0.5rem;">
+        <a href="/history" class="btn btn-sm {% if current_filter == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+        <a href="/history?filter_type=home" class="btn btn-sm {% if current_filter == 'home' %}btn-primary{% else %}btn-secondary{% endif %}">Home</a>
+        <a href="/history?filter_type=party" class="btn btn-sm {% if current_filter == 'party' %}btn-primary{% else %}btn-secondary{% endif %}">Party</a>
+        <a href="/history?filter_type=jewelry" class="btn btn-sm {% if current_filter == 'jewelry' %}btn-primary{% else %}btn-secondary{% endif %}">Jewelry</a>
+    </div>
+</div>
+
+<!-- Plans History Table -->
+<div class="form-card" style="margin-bottom: 2.5rem; padding: 2rem;">
+    <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900); margin-bottom: 1rem;">
+        Saved Budget Plans
+    </h2>
+
+    {% if plans %}
+    <div style="overflow-x: auto;">
+        <table class="price-comparison-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Budget</th>
+                    <th>Spend</th>
+                    <th>Travel</th>
+                    <th>Remaining</th>
+                    <th>Status</th>
+                    <th>Items</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in plans %}
+                <tr>
+                    <td style="color:var(--neutral-600); font-size:0.85rem;">{{ p.created_at[:16] }}</td>
+                    <td>
+                        <span class="rec-category-badge">
+                            {{ p.planner_type | capitalize }}
+                        </span>
+                    </td>
+                    <td><strong data-currency>{{ p.total_budget }}</strong></td>
+                    <td data-currency>{{ p.allocated_spend }}</td>
+                    <td data-currency>{{ p.estimated_travel or 0 }}</td>
+                    <td data-currency class="{% if p.remaining_budget >= 0 %}success{% else %}danger{% endif %}">
+                        {{ p.remaining_budget }}
+                    </td>
+                    <td>
+                        {% if p.status == 'within_budget' %}
+                            <span style="color:var(--accent-emerald); font-weight:600; font-size:0.85rem;">✓ Within</span>
+                        {% elif p.status == 'near_budget' %}
+                            <span style="color:var(--accent-amber); font-weight:600; font-size:0.85rem;">~ Near</span>
+                        {% else %}
+                            <span style="color:var(--accent-rose); font-weight:600; font-size:0.85rem;">! Over</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ p.item_count }} items</td>
+                    <td>
+                        <a href="/recommendations-details?history_id={{ p.id }}" class="btn btn-primary btn-sm">
+                            Inspect &rarr;
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 2rem; color: var(--neutral-500);">
+        <p>No plans found for this filter.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Scanned Products History -->
+<div class="form-card" style="padding: 2rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary-900);">
+            In-Store Product Scan History
+        </h2>
+        <a href="/scan-product" class="btn btn-accent btn-sm">📷 New Scan</a>
+    </div>
+
+    {% if scans %}
+    <div style="overflow-x: auto;">
+        <table class="price-comparison-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Product</th>
+                    <th>Confidence</th>
+                    <th>Local Store Price</th>
+                    <th>Lowest Online Price</th>
+                    <th>Possible Saving</th>
+                    <th>Links</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in scans %}
+                <tr>
+                    <td style="color:var(--neutral-600); font-size:0.85rem;">{{ s.created_at[:16] }}</td>
+                    <td>
+                        <strong>{{ s.brand or '' }} {{ s.product_name }}</strong>
+                        {% if s.model %}<br><small style="color:var(--neutral-500);">Model: {{ s.model }}</small>{% endif %}
+                    </td>
+                    <td>
+                        <span class="rec-badge-nearby" style="font-size:0.75rem;">{{ s.match_confidence }}</span>
+                    </td>
+                    <td><strong data-currency>{{ s.local_price }}</strong></td>
+                    <td data-currency style="color:var(--primary-700); font-weight:700;">{{ s.lowest_online_price or '—' }}</td>
+                    <td>
+                        {% if s.possible_saving and s.possible_saving > 0 %}
+                            <span style="color:var(--accent-emerald); font-weight:700;" data-currency>{{ s.possible_saving }}</span>
+                        {% else %}
+                            <span style="color:var(--neutral-500); font-size:0.85rem;">Best locally</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if s.online_prices and s.online_prices | length > 0 %}
+                            <a href="{{ s.online_prices[0].url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
+                                View Online &rarr;
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 2rem; color: var(--neutral-500);">
+        <p>No products scanned yet. Use the <a href="/scan-product">Product Scanner</a> to log store price checks.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

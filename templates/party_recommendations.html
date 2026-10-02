@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Party Budget & Venue Recommendations - PocketSmart AI{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem;">
+    <div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 0.5rem;">
+            <a href="/party-planner" style="color:var(--neutral-500); font-size:0.9rem;">&larr; Reconfigure Event</a>
+            <span style="color:var(--neutral-400);">•</span>
+            <span style="color:var(--neutral-600); font-size:0.9rem;">{{ input.event_type }} ({{ input.guest_count }} Guests)</span>
+        </div>
+        <h1 class="page-title">Event Budget & Venue Options</h1>
+        <p class="page-subtitle">{{ summary.ai_summary }}</p>
+    </div>
+    <div style="display:flex; gap:0.75rem;">
+        <a href="/party-planner" class="btn btn-secondary btn-sm">Edit Plan</a>
+        <a href="/history" class="btn btn-primary btn-sm">View in History</a>
+    </div>
+</div>
+
+<!-- Budget Summary Panel (Distinguishing Service vs Travel) -->
+<div class="budget-summary-panel">
+    <div class="summary-stats-grid">
+        <div class="stat-box">
+            <div class="stat-label">Total Budget</div>
+            <div class="stat-value" data-currency>{{ summary.total_budget }}</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Plan Cost (Services)</div>
+            <div class="stat-value primary" data-currency>{{ summary.total_spend }}</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Travel Estimate</div>
+            <div class="stat-value amber" data-currency>{{ summary.total_travel_estimate }}</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Effective Total Spend</div>
+            <div class="stat-value" data-currency>{{ summary.effective_total }}</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Remaining Budget</div>
+            <div class="stat-value {% if summary.remaining_budget >= 0 %}success{% else %}danger{% endif %}" data-currency>
+                {{ summary.remaining_budget }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Allocations Progress -->
+    <div style="margin-top: 0.75rem;">
+        <div style="display:flex; justify-content:space-between; font-size:0.82rem; font-weight:700; color:var(--neutral-600); margin-bottom:0.35rem;">
+            <span>Budget Allocation Breakdown</span>
+            <span>{{ (summary.effective_total / summary.total_budget * 100) | round(1) }}% Utilized</span>
+        </div>
+        <div class="budget-progress-track">
+            <div class="budget-progress-fill" style="width: {{ [100, (summary.effective_total / summary.total_budget * 100)] | min }}%;"></div>
+        </div>
+
+        <div style="display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:0.75rem;">
+            {% for alloc in summary.allocations %}
+            <div style="font-size:0.82rem; color:var(--neutral-600);">
+                <span style="font-weight:700; color:var(--neutral-800);">{{ alloc.category }}:</span>
+                <span data-currency>{{ alloc.spent_amount }}</span>
+                <span style="color:var(--neutral-400);">/</span>
+                <span data-currency>{{ alloc.allocated_amount }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- 60 KM Rule Context Banner -->
+{% if input.user_latitude and input.user_longitude %}
+<div class="alert alert-info" style="margin-bottom: 2rem;">
+    <span>📍</span>
+    <div>
+        <strong>Nearby-First 60 KM Policy Active:</strong> Options located within 60 km show round-trip travel duration and estimated fuel/transit costs. Venues beyond 60 km are clearly badged as destination alternatives.
+    </div>
+</div>
+{% endif %}
+
+<!-- Recommendations Grid -->
+<div style="margin-bottom: 1.25rem;">
+    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--primary-900);">Event Services & Venue Options</h2>
+</div>
+
+<div class="recommendations-grid">
+    {% for item in summary.items %}
+    <div class="rec-card">
+        <div class="rec-header">
+            <span class="rec-category-badge">{{ item.category }}</span>
+            {% if item.distance_km is not none %}
+                {% if item.is_nearby %}
+                    <span class="rec-badge-nearby">📍 {{ item.distance_km }} km away (Nearby)</span>
+                {% else %}
+                    <span class="rec-badge-far">⚠️ {{ item.distance_km }} km (Outside 60 KM)</span>
+                {% endif %}
+            {% else %}
+                <span style="font-size:0.82rem; font-weight:700; color:var(--neutral-600);">
+                    ⭐ {{ item.rating or '4.5' }} ({{ item.review_count or '200+' }})
+                </span>
+            {% endif %}
+        </div>
+
+        <h3 class="rec-title">{{ item.name }}</h3>
+
+        {% if item.location %}
+            <div style="font-size:0.82rem; color:var(--neutral-500); margin-bottom:0.5rem;">
+                📍 {{ item.location }}
+            </div>
+        {% endif %}
+
+        <p style="font-size:0.88rem; color:var(--neutral-600); margin-bottom:0.75rem; line-height:1.4;">
+            {{ item.description }}
+        </p>
+
+        <!-- Pricing with Travel Addition -->
+        <div class="rec-price-box">
+            <div class="rec-price-row">
+                <span>Base Service Cost:</span>
+                <strong data-currency>{{ item.price }}</strong>
+            </div>
+
+            {% if item.travel_cost_estimate is not none %}
+            <div class="rec-price-row" style="color:var(--neutral-600);">
+                <span>🚗 Est. Travel ({{ item.travel_time_minutes }} mins):</span>
+                <span data-currency>{{ item.travel_cost_estimate }}</span>
+            </div>
+            <div class="rec-price-row rec-effective-total">
+                <span>Effective Total Cost:</span>
+                <span class="rec-price-highlight" data-currency>{{ item.effective_total_cost or (item.price + item.travel_cost_estimate) }}</span>
+            </div>
+            {% else %}
+            <div class="rec-price-row" style="border-top:1px solid var(--neutral-200); padding-top:0.35rem; margin-top:0.35rem;">
+                <span style="font-weight:700;">Total Package:</span>
+                <span class="rec-price-highlight" data-currency>{{ item.total_price }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if item.reason %}
+        <div class="rec-reason">
+            <strong>Why recommended:</strong> {{ item.reason }}
+        </div>
+        {% endif %}
+
+        <div class="rec-actions">
+            <!-- Website or Maps link -->
+            {% if item.url and item.url.startswith('http') and 'search' not in item.url %}
+                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="flex:1;">
+                    🌐 Official Website
+                </a>
+            {% else %}
+                <span class="btn btn-secondary btn-sm" style="cursor:default; opacity:0.8;">
+                    Website Unavailable
+                </span>
+            {% endif %}
+
+            {% if item.google_maps_url %}
+                <a href="{{ item.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm" style="flex:1;">
+                    🗺️ Google Maps
+                </a>
+            {% else %}
+                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="flex:1;">
+                    Open on {{ item.platform }}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

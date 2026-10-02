@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Home Interior Budget Planner - PocketSmart AI{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="max-width: 720px; margin: 1.5rem auto;">
+    <div class="page-header">
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 0.5rem;">
+            <a href="/dashboard" style="color:var(--neutral-500); font-size:0.9rem;">&larr; Back to Dashboard</a>
+        </div>
+        <h1 class="page-title">🛋️ Home Interior Budget Planner</h1>
+        <p class="page-subtitle">
+            Configure your room specifications and budget. PocketSmart AI will balance furniture, lighting, fans, and decor across Amazon, Flipkart, and IKEA.
+        </p>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-error">
+            <span>⚠️</span>
+            <span>{{ error }}</span>
+        </div>
+    {% endif %}
+
+    <div class="form-card">
+        <form action="/generate-home" method="POST">
+            <!-- Budget -->
+            <div class="form-group">
+                <label for="total_budget" class="form-label">Total Interior Budget (INR) <span style="color:var(--accent-rose);">*</span></label>
+                <div class="input-prefix-box">
+                    <span>₹</span>
+                    <input type="number" id="total_budget" name="total_budget" class="form-input" value="{{ default_budget }}" min="1000" step="500" required>
+                </div>
+                <small style="color:var(--neutral-500); font-size:0.8rem; margin-top:0.25rem; display:block;">
+                    Recommended: ₹25,000 - ₹2,00,000 for standard room furnishing.
+                </small>
+            </div>
+
+            <!-- Room Type & Style -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="room_type" class="form-label">Room Type <span style="color:var(--accent-rose);">*</span></label>
+                    <select id="room_type" name="room_type" class="form-select" required>
+                        <option value="Living Room" selected>Living Room</option>
+                        <option value="Bedroom">Bedroom</option>
+                        <option value="Kitchen">Kitchen</option>
+                        <option value="Dining Room">Dining Room</option>
+                        <option value="Home Office">Home Office</option>
+                        <option value="Guest Room">Guest Room</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="style_preference" class="form-label">Style / Aesthetic</label>
+                    <select id="style_preference" name="style_preference" class="form-select">
+                        <option value="Modern" selected>Modern & Contemporary</option>
+                        <option value="Minimalist">Minimalist</option>
+                        <option value="Scandinavian">Scandinavian (IKEA Style)</option>
+                        <option value="Traditional">Warm Traditional / Wood</option>
+                        <option value="Industrial">Urban Industrial</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Quantities Grid -->
+            <div style="background-color:#f8fafc; border:1px solid var(--neutral-200); border-radius:var(--radius-md); padding:1.25rem; margin-bottom:1.5rem;">
+                <label class="form-label" style="margin-bottom:0.75rem; color:var(--primary-900);">
+                    Item Quantities Desired
+                </label>
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label for="num_furniture" class="form-label" style="font-size:0.82rem;">Furniture Items (Sofa, Table, Bed)</label>
+                        <input type="number" id="num_furniture" name="num_furniture" class="form-input" value="2" min="0" max="20">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label for="num_lights" class="form-label" style="font-size:0.82rem;">Lighting Fixtures (Panel, Lamps)</label>
+                        <input type="number" id="num_lights" name="num_lights" class="form-input" value="4" min="0" max="30">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="num_fans" class="form-label" style="font-size:0.82rem;">Ceiling Fans (BLDC / High-Speed)</label>
+                        <input type="number" id="num_fans" name="num_fans" class="form-input" value="1" min="0" max="10">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="num_decor" class="form-label" style="font-size:0.82rem;">Decor & Accents (Curtains, Plants)</label>
+                        <input type="number" id="num_decor" name="num_decor" class="form-input" value="2" min="0" max="20">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="form-group">
+                <label for="additional_notes" class="form-label">Additional Preferences or Room Dimensions</label>
+                <textarea id="additional_notes" name="additional_notes" class="form-textarea" rows="3" placeholder="e.g. Prefer wooden walnut finish, warm 3000K lighting, medium sized 12x14 ft room."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:1rem;">
+                Generate Home Interior Plan &rarr;
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
